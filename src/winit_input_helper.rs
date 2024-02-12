@@ -93,10 +93,18 @@ impl WinitInputHelper {
     /// But this method is useful when your application logic steps dont line up with winit's event loop.
     /// e.g. you have a seperate thread for application logic using WinitInputHelper that constantly
     /// runs regardless of winit's event loop and you need to send events to it directly.
-    pub fn step_with_window_events(&mut self, events: &[WindowEvent]) {
+    pub fn step_with_events<T>(&mut self, events: &[&Event<T>]) {
         self.step();
         for event in events {
-            self.process_window_event(event);
+            match event {
+                Event::WindowEvent { event, .. } => {
+                    self.process_window_event(event);
+                }
+                Event::DeviceEvent { event, .. } => {
+                    self.process_device_event(event);
+                }
+                _ => {}
+            }
         }
         self.end_step();
     }
